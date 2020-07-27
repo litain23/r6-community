@@ -9,7 +9,7 @@ import me.r6_search.model.userprofile.UserProfile;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/c")
+@RequestMapping("/api/c")
 @RestController
 public class CommentController {
     private final CommentService commentService;

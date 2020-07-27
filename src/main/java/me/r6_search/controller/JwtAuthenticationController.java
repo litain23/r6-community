@@ -18,7 +18,7 @@ import javax.validation.Valid;
 
 @RequiredArgsConstructor
 @CrossOrigin
-@RequestMapping("/api/v1")
+@RequestMapping("/api/c")
 @RestController
 public class JwtAuthenticationController {
     private final AuthenticationManager authenticationManager;
