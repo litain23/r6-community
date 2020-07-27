@@ -1,7 +1,9 @@
 package me.r6_search.model.post;
 
+import org.springframework.data.annotation.QueryAnnotation;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
@@ -13,4 +15,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findByType(PostType postType, Pageable pageable);
     List<Post> findByNotice(boolean isNotice);
     List<Post> findByType(PostType postType);
+
+    Long countByType(PostType postType);
+//    @Query(value = "SELECT COUNT(*) FROM POST WHERE type=:type")
 }

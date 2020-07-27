@@ -31,8 +31,17 @@ public class PostService {
     private final int VIEW_POST_CNT = 20;
 
     @Transactional(readOnly = true)
-    public List<PostSummaryDto> getCategoryPostList(String type, int page) {
-        // page * 20 이 전체 글보다 작은경우 ?
+    public TopicSummaryDto getCategoryPostList(String type, int page) {
+        long postCnt = postRepository.countByType(PostType.valueOf(type));
+        // 페이지가 수가 잘못되었을 때는 그냥 page 를 1로 하고 진행
+        if(page <= 0 || postCnt / 20 + 1 < page) {
+            page = 1;
+        }
+
+        PageMetaDto metaDto = PageMetaDto.builder()
+                .currentPage(page)
+                .totalPage(postCnt / 20 + 1)
+                .build();
 
         // 공지사항 가져오기
         List<Post> postSummaryList = addNoticePost();
@@ -57,11 +66,13 @@ public class PostService {
             postSummaryDtoList.add(dto);
         }
 
-        PageMetaDto metaDto = PageMetaDto.builder()
-                .currentPage(0)
-                .totalPage(0)
+
+        TopicSummaryDto summaryDto = TopicSummaryDto.builder()
+                .meta(metaDto)
+                .postList(postSummaryDtoList)
                 .build();
-        return postSummaryDtoList;
+
+        return summaryDto;
     }
 
     private List<Post> addNoticePost() {

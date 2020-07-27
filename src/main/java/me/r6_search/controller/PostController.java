@@ -16,14 +16,14 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping("/topic/{type}")
-    public List<PostSummaryDto> getPostList(@PathVariable String type,
+    public TopicSummaryDto getPostList(@PathVariable String type,
                                             @RequestParam(defaultValue = "1", required = false) int page) {
         return postService.getCategoryPostList(type, page);
     }
 
     @GetMapping("/post/{id}")
     public PostResponseDto getPost(@PathVariable long id,
-                                                             @UserProfileAnnotation UserProfile userProfile) {
+                                   @UserProfileAnnotation UserProfile userProfile) {
         return postService.getPost(id, userProfile);
     }
 

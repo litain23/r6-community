@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @Builder
 public class PageMetaDto {
-    int currentPage;
-    int totalPage;
+    long currentPage;
+    long totalPage;
 }
