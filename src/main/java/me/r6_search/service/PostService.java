@@ -100,8 +100,7 @@ public class PostService {
     public long savePost(PostSaveRequestDto requestDto, UserProfile userProfile) {
         Post post = requestDto.toEntity(userProfile);
 
-        // 임시
-        // 공지는 admin 권한을 가진 사람만 가능 - 추가해야됨
+        // TODO : 공지는 admin 권한을 가진 사람만 가능 - 추가해야됨
         if(requestDto.getType() == "notice") throw new BoardException("권한이 없습니다");
         return postRepository.save(post).getId();
     }

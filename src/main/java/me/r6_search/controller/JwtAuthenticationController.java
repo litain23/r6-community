@@ -54,7 +54,7 @@ public class JwtAuthenticationController {
         if(isAuthenticated) {
             return new ResponseEntity("{\"message\": \"Email Authentication Success\"}", HttpStatus.OK);
         } else {
-            return new ResponseEntity("{\"message\": \"Email Authentication fail, Check email again\"}", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity("{\"message\": \"Email Authentication fail, Check email again\"}", HttpStatus.NOT_FOUND);
         }
     }
 

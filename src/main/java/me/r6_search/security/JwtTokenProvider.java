@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RequiredArgsConstructor
-//@PropertySource("classpath:jwt-secret.properties")
 @Component
 public class JwtTokenProvider {
     @Value("${jwt.expiration-time}")
