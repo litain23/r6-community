@@ -19,6 +19,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.nio.file.Files;
 
 @RequiredArgsConstructor
 @CrossOrigin
@@ -71,9 +72,6 @@ public class JwtAuthenticationController {
 
         userProfileService.changePassword(requestDto.getPassword(), userProfile);
         return new ResponseEntity("{\"message\": \"Password changed\"}", HttpStatus.OK);
-
-
-
     }
 }
 

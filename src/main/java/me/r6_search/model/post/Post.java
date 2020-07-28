@@ -3,6 +3,7 @@ package me.r6_search.model.post;
 import lombok.Builder;
 import lombok.Getter;
 import me.r6_search.model.comment.Comment;
+import me.r6_search.model.imgsrc.ImgSrc;
 import me.r6_search.model.postrecommend.PostRecommend;
 import me.r6_search.model.userprofile.UserProfile;
 import me.r6_search.dto.post.PostUpdateRequestDto;
@@ -39,14 +40,17 @@ public class Post {
 
     private int recommendCnt;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
-    private List<Comment> commentList = new ArrayList<>();
-
     @Enumerated(EnumType.STRING)
     private PostType type;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    private List<Comment> commentList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private List<PostRecommend> recommendList;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    private List<ImgSrc> imgSrcList;
 
     @CreatedDate
     private LocalDateTime createdTime;
@@ -69,6 +73,10 @@ public class Post {
     public void updatePost(PostUpdateRequestDto requestDto) {
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
+    }
+
+    public void addImgSrc(ImgSrc imgSrc) {
+        this.imgSrcList.add(imgSrc);
     }
 
     public void increaseViewCnt() {

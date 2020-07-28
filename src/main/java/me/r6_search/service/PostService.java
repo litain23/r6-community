@@ -1,6 +1,8 @@
 package me.r6_search.service;
 
 import lombok.RequiredArgsConstructor;
+import me.r6_search.model.imgsrc.ImgSrc;
+import me.r6_search.model.imgsrc.ImgSrcRepository;
 import me.r6_search.model.post.Post;
 import me.r6_search.model.post.PostRepository;
 import me.r6_search.model.post.PostType;
@@ -16,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,9 +27,11 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 public class PostService {
-    private final PostRepository postRepository;
     private final PostRecommendRepository postRecommendRepository;
+    private final PostRepository postRepository;
     private final CommentService commentService;
+    private final AWSS3Service awss3Service;
+    private final ImgSrcRepository imgSrcRepository;
 
     private final int VIEW_POST_CNT = 20;
 
@@ -54,7 +59,7 @@ public class PostService {
             PostSummaryDto dto = PostSummaryDto.builder()
                     .author(post.getUserProfile().getUsername())
                     .title(post.getTitle())
-                    .hasImg(true)
+                    .hasImg(post.getImgSrcList().size() > 0)
                     .createdTime(post.getCreatedTime())
                     .recommendCnt(post.getRecommendCnt())
                     .viewCnt(post.getViewCnt())
@@ -65,7 +70,6 @@ public class PostService {
 
             postSummaryDtoList.add(dto);
         }
-
 
         TopicSummaryDto summaryDto = TopicSummaryDto.builder()
                 .meta(metaDto)
@@ -97,12 +101,23 @@ public class PostService {
     }
 
     @Transactional
-    public long savePost(PostSaveRequestDto requestDto, UserProfile userProfile) {
-        Post post = requestDto.toEntity(userProfile);
-
+    public long savePost(PostSaveRequestDto requestDto, MultipartFile[] files, UserProfile userProfile) {
         // TODO : 공지는 admin 권한을 가진 사람만 가능 - 추가해야됨
         if(requestDto.getType() == "notice") throw new BoardException("권한이 없습니다");
-        return postRepository.save(post).getId();
+
+        Post post = requestDto.toEntity(userProfile);
+        postRepository.save(post);
+
+        if(files != null) {
+            List<String> fileNameList = awss3Service.uploadFile(files);
+            for(String fileName : fileNameList) {
+                ImgSrc imgSrc = new ImgSrc(post, fileName);
+                imgSrcRepository.save(imgSrc);
+                post.addImgSrc(imgSrc);
+            }
+        }
+
+        return post.getId();
     }
 
     @Transactional

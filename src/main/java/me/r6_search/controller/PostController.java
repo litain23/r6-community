@@ -2,10 +2,12 @@ package me.r6_search.controller;
 
 import lombok.RequiredArgsConstructor;
 import me.r6_search.config.UserProfileAnnotation;
+import me.r6_search.exception.board.PostIllegalFileExtensionException;
 import me.r6_search.model.userprofile.UserProfile;
 import me.r6_search.service.PostService;
 import me.r6_search.dto.post.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -29,8 +31,20 @@ public class PostController {
 
     @PostMapping("/post")
     public long makePost(@RequestBody PostSaveRequestDto requestDto,
+                         @RequestParam(name = "files", required = false) MultipartFile[] files,
                          @UserProfileAnnotation UserProfile userProfile) {
-        return postService.savePost(requestDto, userProfile);
+        checkFilesExtension(files);
+        return postService.savePost(requestDto, files, userProfile);
+    }
+
+    private void checkFilesExtension(MultipartFile[] files) {
+        if(files == null) return;
+        for(MultipartFile file : files) {
+            String fileName = file.getOriginalFilename();
+            String extension = fileName.substring(fileName.lastIndexOf('.') + 1);
+            if(extension.equals("jpeg") || extension.equals("jpg") || extension.equals("png") || extension.equals("gif")) continue;
+            else throw new PostIllegalFileExtensionException("파일 확장자는 jpeg, jpg, png, gif 만 가능합니다");
+        }
     }
 
     @PutMapping("/post/{id}")

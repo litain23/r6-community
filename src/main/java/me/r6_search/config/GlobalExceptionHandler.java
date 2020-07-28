@@ -67,6 +67,12 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponseDto, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(PostIllegalFileExtensionException.class)
+    protected ResponseEntity<ErrorResponseDto> handlerPostIllegalFileExtensionException(PostIllegalFileExtensionException e) {
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(e.getMessage(), 400);
+        return new ResponseEntity<>(errorResponseDto, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(BoardException.class)
     protected ResponseEntity<ErrorResponseDto> handlerBoardException(BoardException e) {
         ErrorResponseDto errorResponseDto = new ErrorResponseDto(e.getMessage(), 400);
