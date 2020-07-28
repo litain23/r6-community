@@ -78,5 +78,12 @@ public class GlobalExceptionHandler {
         ErrorResponseDto errorResponseDto = new ErrorResponseDto(e.getMessage(), 400);
         return new ResponseEntity<>(errorResponseDto, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(RuntimeException.class)
+    protected ResponseEntity<ErrorResponseDto> handlerRuntimeException(RuntimeException e) {
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(e.getMessage(), 400);
+        return new ResponseEntity<>(errorResponseDto, HttpStatus.BAD_REQUEST);
+    }
+
 }
 

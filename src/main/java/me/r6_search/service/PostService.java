@@ -101,22 +101,20 @@ public class PostService {
     }
 
     @Transactional
-    public long savePost(PostSaveRequestDto requestDto, MultipartFile[] files, UserProfile userProfile) {
-        // TODO : 공지는 admin 권한을 가진 사람만 가능 - 추가해야됨
+    public Long savePost(PostSaveRequestDto requestDto, UserProfile userProfile) {
         if(requestDto.getType() == "notice") throw new BoardException("권한이 없습니다");
 
         Post post = requestDto.toEntity(userProfile);
         postRepository.save(post);
 
-        if(files != null) {
-            List<String> fileNameList = awss3Service.uploadFile(files);
+        if(requestDto.getFiles() != null) {
+            List<String> fileNameList = awss3Service.uploadFile(requestDto.getFiles());
             for(String fileName : fileNameList) {
                 ImgSrc imgSrc = new ImgSrc(post, fileName);
                 imgSrcRepository.save(imgSrc);
                 post.addImgSrc(imgSrc);
             }
         }
-
         return post.getId();
     }
 

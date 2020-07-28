@@ -6,10 +6,12 @@ import me.r6_search.exception.board.PostIllegalFileExtensionException;
 import me.r6_search.model.userprofile.UserProfile;
 import me.r6_search.service.PostService;
 import me.r6_search.dto.post.*;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
+import java.awt.*;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/c")
@@ -19,7 +21,7 @@ public class PostController {
 
     @GetMapping("/topic/{type}")
     public TopicSummaryDto getPostList(@PathVariable String type,
-                                            @RequestParam(defaultValue = "1", required = false) int page) {
+                                        @RequestParam(defaultValue = "1", required = false) int page) {
         return postService.getCategoryPostList(type, page);
     }
 
@@ -29,12 +31,13 @@ public class PostController {
         return postService.getPost(id, userProfile);
     }
 
-    @PostMapping("/post")
-    public long makePost(@RequestBody PostSaveRequestDto requestDto,
-                         @RequestParam(name = "files", required = false) MultipartFile[] files,
-                         @UserProfileAnnotation UserProfile userProfile) {
-        checkFilesExtension(files);
-        return postService.savePost(requestDto, files, userProfile);
+    @PostMapping(value = "/post", produces = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity makePost(PostSaveRequestDto requestDto,
+//                         @RequestParam(name = "files", required = false) MultipartFile[] files,
+                                   @UserProfileAnnotation UserProfile userProfile) {
+        checkFilesExtension(requestDto.getFiles());
+        postService.savePost(requestDto, userProfile);
+        return ResponseEntity.ok("hello");
     }
 
     private void checkFilesExtension(MultipartFile[] files) {

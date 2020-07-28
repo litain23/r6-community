@@ -4,6 +4,9 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.RequiredArgsConstructor;
+import me.r6_search.utils.RandomStringGenerator;
+import org.hibernate.cache.spi.support.RegionNameQualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,11 +22,14 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 public class AWSS3Service {
-    private AmazonS3 amazonS3;
+    private final AmazonS3 amazonS3;
+
+    @Value("#{systemEnvironment['aws_s3_bucket_name']}")
     private String bucketName;
 
     public List<String> uploadFile(MultipartFile[] files) {
         if(files == null) return Collections.EMPTY_LIST;
+
         List<String> fileNameList = new ArrayList<>();
         try {
             for(MultipartFile file : files) {
@@ -32,9 +38,9 @@ public class AWSS3Service {
                 saveFile.delete();
             }
         } catch (IOException e) {
-
+            throw new RuntimeException("File upload failed");
         } catch (AmazonServiceException e) {
-
+            throw new RuntimeException("File upload failed");
         }
         return fileNameList;
     }
@@ -50,8 +56,9 @@ public class AWSS3Service {
     }
 
     private String uploadFileToS3Bucket(String bucketName, File file) {
-        String uniqueFileName = LocalDateTime.now() + "_" + file.getName();
-        PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, uniqueFileName, file);
+        RandomStringGenerator stringGenerator = new RandomStringGenerator();
+        String uniqueFileName = file.getName() + "_" + stringGenerator.generateRandomString(8);
+        PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName + "/r6-community-img", uniqueFileName, file);
         amazonS3.putObject(putObjectRequest);
         return uniqueFileName;
     }
