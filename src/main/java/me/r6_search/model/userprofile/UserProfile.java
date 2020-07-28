@@ -74,4 +74,8 @@ public class UserProfile {
     public void setUbiAuthenticated(boolean isUbiAuthenticated) {
         this.isUbiAuthenticated = isUbiAuthenticated;
     }
+
+    public void changePassword(String password) {
+        this.password = password;
+    }
 }

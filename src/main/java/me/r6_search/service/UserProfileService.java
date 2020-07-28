@@ -1,6 +1,7 @@
 package me.r6_search.service;
 
 import lombok.RequiredArgsConstructor;
+import me.r6_search.dto.PasswordChangeRequestDto;
 import me.r6_search.model.userrole.UserRole;
 import me.r6_search.dto.SignUpRequestDto;
 import me.r6_search.exception.user.UserProfileNotFound;
@@ -11,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.security.auth.callback.PasswordCallback;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
@@ -52,6 +54,12 @@ public class UserProfileService {
         return false;
     }
 
+    @Transactional
+    public void changePassword(String password, UserProfile userProfile) {
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        userProfile.changePassword(passwordEncoder.encode(password));
+    }
+
     public UserProfile getUserProfile(String username) {
         return userProfileRepository.findByUsername(username).orElseThrow(() -> new UserProfileNotFound("유저를 찾을 수 없습니다."));
     }
@@ -60,7 +68,7 @@ public class UserProfileService {
         SecureRandom rnd = new SecureRandom();
         StringBuilder sb = new StringBuilder(len);
         for( int i = 0; i < len; i++ )
-            sb.append( RANDOM_CODE.charAt( rnd.nextInt(RANDOM_CODE.length()) ) );
+            sb.append(RANDOM_CODE.charAt( rnd.nextInt(RANDOM_CODE.length())));
         return sb.toString();
     }
 }

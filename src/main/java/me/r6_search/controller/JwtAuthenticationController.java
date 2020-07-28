@@ -1,10 +1,14 @@
 package me.r6_search.controller;
 
+import com.sun.mail.iap.Response;
 import lombok.RequiredArgsConstructor;
+import me.r6_search.config.UserProfileAnnotation;
 import me.r6_search.dto.JwtRequestDto;
 import me.r6_search.dto.JwtResponseDto;
+import me.r6_search.dto.PasswordChangeRequestDto;
 import me.r6_search.dto.SignUpRequestDto;
 import me.r6_search.exception.user.UserAuthenticationException;
+import me.r6_search.model.userprofile.UserProfile;
 import me.r6_search.security.JwtTokenProvider;
 import me.r6_search.service.UserProfileService;
 import org.springframework.http.HttpStatus;
@@ -58,5 +62,18 @@ public class JwtAuthenticationController {
         }
     }
 
+    @PostMapping("/change-pw")
+    public ResponseEntity changePassword(@RequestBody PasswordChangeRequestDto requestDto,
+                                         @UserProfileAnnotation UserProfile userProfile) {
+        if(!requestDto.getPassword().equals(requestDto.getPassword1())) {
+            return new ResponseEntity("{\"message\": \"Password is not same\"}", HttpStatus.BAD_REQUEST);
+        }
+
+        userProfileService.changePassword(requestDto.getPassword(), userProfile);
+        return new ResponseEntity("{\"message\": \"Password changed\"}", HttpStatus.OK);
+
+
+
+    }
 }
 
