@@ -31,12 +31,12 @@ public class PostController {
         return postService.getPost(id, userProfile);
     }
 
-    @PostMapping(value = "/post", produces = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity makePost(PostSaveRequestDto requestDto,
+    @PostMapping(value = "/post", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public PostSaveResponseDto makePost(PostSaveRequestDto requestDto,
                                    @UserProfileAnnotation UserProfile userProfile) {
         checkFilesExtension(requestDto.getFiles());
         postService.savePost(requestDto, userProfile);
-        return ResponseEntity.ok("hello");
+        return new PostSaveResponseDto("good");
     }
 
     private void checkFilesExtension(MultipartFile[] files) {

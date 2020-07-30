@@ -1,6 +1,7 @@
 package me.r6_search.service;
 
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.RequiredArgsConstructor;
@@ -38,9 +39,13 @@ public class AWSS3Service {
                 saveFile.delete();
             }
         } catch (IOException e) {
-            throw new RuntimeException("File upload failed");
+            throw new RuntimeException("File save fail");
         } catch (AmazonServiceException e) {
-            throw new RuntimeException("File upload failed");
+            e.printStackTrace();
+            throw new RuntimeException("File upload fail");
+        } catch (SdkClientException e) {
+            e.printStackTrace();
+            throw new RuntimeException("S3 Connect fail");
         }
         return fileNameList;
     }
@@ -55,7 +60,7 @@ public class AWSS3Service {
         return file;
     }
 
-    private String uploadFileToS3Bucket(String bucketName, File file) {
+    private String uploadFileToS3Bucket(String bucketName, File file) throws SdkClientException {
         RandomStringGenerator stringGenerator = new RandomStringGenerator();
         String uniqueFileName = stringGenerator.generateRandomString(8) + "_" + file.getName();
         PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, uniqueFileName, file);

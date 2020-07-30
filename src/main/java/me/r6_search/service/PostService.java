@@ -101,7 +101,7 @@ public class PostService {
     }
 
     @Transactional
-    public Long savePost(PostSaveRequestDto requestDto, UserProfile userProfile) {
+    public Long savePost(PostSaveRequestDto requestDto, UserProfile userProfile) throws RuntimeException{
         if(requestDto.getType() == "notice") throw new BoardException("권한이 없습니다");
 
         Post post = requestDto.toEntity(userProfile);
