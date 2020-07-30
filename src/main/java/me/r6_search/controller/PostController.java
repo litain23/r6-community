@@ -33,7 +33,6 @@ public class PostController {
 
     @PostMapping(value = "/post", produces = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity makePost(PostSaveRequestDto requestDto,
-//                         @RequestParam(name = "files", required = false) MultipartFile[] files,
                                    @UserProfileAnnotation UserProfile userProfile) {
         checkFilesExtension(requestDto.getFiles());
         postService.savePost(requestDto, userProfile);

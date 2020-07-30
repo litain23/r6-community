@@ -57,8 +57,8 @@ public class AWSS3Service {
 
     private String uploadFileToS3Bucket(String bucketName, File file) {
         RandomStringGenerator stringGenerator = new RandomStringGenerator();
-        String uniqueFileName = file.getName() + "_" + stringGenerator.generateRandomString(8);
-        PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName + "/r6-community-img", uniqueFileName, file);
+        String uniqueFileName = stringGenerator.generateRandomString(8) + "_" + file.getName();
+        PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, uniqueFileName, file);
         amazonS3.putObject(putObjectRequest);
         return uniqueFileName;
     }
