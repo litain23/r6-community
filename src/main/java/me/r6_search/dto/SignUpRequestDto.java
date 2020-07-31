@@ -24,6 +24,4 @@ public class SignUpRequestDto {
 
     @NotBlank
     private String password;
-    @NotBlank
-    private String password2;
 }
