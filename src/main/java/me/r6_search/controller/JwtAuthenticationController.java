@@ -8,6 +8,7 @@ import me.r6_search.dto.JwtResponseDto;
 import me.r6_search.dto.PasswordChangeRequestDto;
 import me.r6_search.dto.SignUpRequestDto;
 import me.r6_search.exception.user.UserAuthenticationException;
+import me.r6_search.exception.user.UserSignUpValidateException;
 import me.r6_search.model.userprofile.UserProfile;
 import me.r6_search.security.JwtTokenProvider;
 import me.r6_search.service.UserProfileService;
@@ -22,7 +23,6 @@ import javax.validation.Valid;
 import java.nio.file.Files;
 
 @RequiredArgsConstructor
-@CrossOrigin
 @RequestMapping("/api/c")
 @RestController
 public class JwtAuthenticationController {
@@ -42,14 +42,14 @@ public class JwtAuthenticationController {
             String token = jwtTokenProvider.generateToken(username);
             return ResponseEntity.ok(new JwtResponseDto(token));
         } catch (AuthenticationException e) {
-            throw new UserAuthenticationException("Invalid id or pw");
+            throw new UserAuthenticationException("아이디 또는 비밀번호가 일치하지 않습니다");
         }
     }
 
     @PostMapping("/signup")
     public ResponseEntity signup(@RequestBody @Valid SignUpRequestDto signUpRequestDto) {
-        userProfileService.saveUser(signUpRequestDto);
-        return new ResponseEntity<>("{\"status\": \"good\"}", HttpStatus.OK);
+            userProfileService.saveUser(signUpRequestDto);
+            return new ResponseEntity<>("{\"status\": \"good\"}", HttpStatus.OK);
     }
 
     @GetMapping("/authenticate")

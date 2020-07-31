@@ -7,11 +7,8 @@ import me.r6_search.model.userprofile.UserProfile;
 import me.r6_search.service.PostService;
 import me.r6_search.dto.post.*;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.awt.*;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/c")
@@ -32,11 +29,11 @@ public class PostController {
     }
 
     @PostMapping(value = "/post", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public PostSaveResponseDto makePost(PostSaveRequestDto requestDto,
-                                   @UserProfileAnnotation UserProfile userProfile) {
+    public PostModifyResponseDto makePost(PostSaveRequestDto requestDto,
+                                          @UserProfileAnnotation UserProfile userProfile) {
         checkFilesExtension(requestDto.getFiles());
-        postService.savePost(requestDto, userProfile);
-        return new PostSaveResponseDto("good");
+        Long postId = postService.savePost(requestDto, userProfile);
+        return new PostModifyResponseDto("게시글이 생성되었습니다", postId);
     }
 
     private void checkFilesExtension(MultipartFile[] files) {
@@ -50,21 +47,28 @@ public class PostController {
     }
 
     @PutMapping("/post/{id}")
-    public long modifyPost(@PathVariable long id,
-                           @RequestBody PostUpdateRequestDto requestDto,
-                           @UserProfileAnnotation UserProfile userProfile) {
-        return postService.modifyPost(id, requestDto, userProfile);
+    public PostModifyResponseDto modifyPost(@PathVariable long id,
+                                            @RequestBody PostUpdateRequestDto requestDto,
+                                            @UserProfileAnnotation UserProfile userProfile) {
+        Long postId = postService.modifyPost(id, requestDto, userProfile);
+        return new PostModifyResponseDto("게시글이 수정되었습니다", postId);
     }
 
     @DeleteMapping("/post/{id}")
-    public long deletePost(@PathVariable long id,
-                           @UserProfileAnnotation UserProfile userProfile) {
-        return postService.deletePost(id, userProfile);
+    public PostModifyResponseDto deletePost(@PathVariable long id,
+                                            @UserProfileAnnotation UserProfile userProfile) {
+        Long postId = postService.deletePost(id, userProfile);
+        return new PostModifyResponseDto("게시글이 삭제되었습니다", postId);
     }
 
     @PostMapping("/post/{id}/recommend/")
-    public long toggleRecommendPost(@PathVariable long id,
+    public PostRecommendResponseDto toggleRecommendPost(@PathVariable long id,
                               @UserProfileAnnotation UserProfile userProfile) {
-        return postService.toggleRecommendPost(id, userProfile);
+        boolean isRecommend = postService.toggleRecommendPost(id, userProfile);
+        if(isRecommend) {
+            return new PostRecommendResponseDto("이 게시글을 추천을 하였습니다.");
+        } else {
+            return new PostRecommendResponseDto("이 게시글 추천을 취소하였습니다.");
+        }
     }
 }

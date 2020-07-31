@@ -136,10 +136,11 @@ public class PostService {
 
 
     @Transactional
-    public long toggleRecommendPost(long postId, UserProfile userProfile) {
+    public boolean toggleRecommendPost(long postId, UserProfile userProfile) {
         PostRecommend isRecommend = postRecommendRepository.findByPostIdAndUserProfile(postId, userProfile);
         if(isRecommend != null) {
             postRecommendRepository.delete(isRecommend);
+            return false;
         } else {
             Post post = findPostById(postId);
             postRecommendRepository.save(
@@ -148,8 +149,8 @@ public class PostService {
                     .userProfile(userProfile)
                     .build()
             );
+            return true;
         }
-        return postId;
     }
 
     private Post findPostById(long postId) {

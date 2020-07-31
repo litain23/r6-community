@@ -6,16 +6,13 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.RequiredArgsConstructor;
 import me.r6_search.utils.RandomStringGenerator;
-import org.hibernate.cache.spi.support.RegionNameQualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -41,10 +38,8 @@ public class AWSS3Service {
         } catch (IOException e) {
             throw new RuntimeException("File save fail");
         } catch (AmazonServiceException e) {
-            e.printStackTrace();
             throw new RuntimeException("File upload fail");
         } catch (SdkClientException e) {
-            e.printStackTrace();
             throw new RuntimeException("S3 Connect fail");
         }
         return fileNameList;
@@ -55,6 +50,7 @@ public class AWSS3Service {
         try(FileOutputStream outputStream = new FileOutputStream(file)) {
             outputStream.write(multipartFile.getBytes());
         } catch (IOException e) {
+            e.printStackTrace();
             throw e;
         }
         return file;

@@ -47,10 +47,10 @@ public class Post {
     private List<Comment> commentList = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
-    private List<PostRecommend> recommendList;
+    private List<PostRecommend> recommendList = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
-    private List<ImgSrc> imgSrcList;
+    private List<ImgSrc> imgSrcList = new ArrayList<>();
 
     @CreatedDate
     private LocalDateTime createdTime;
