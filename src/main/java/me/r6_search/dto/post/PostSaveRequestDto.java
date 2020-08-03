@@ -2,6 +2,7 @@ package me.r6_search.dto.post;
 
 import lombok.Data;
 import me.r6_search.model.post.Post;
+import me.r6_search.model.post.PostType;
 import me.r6_search.model.userprofile.UserProfile;
 import org.springframework.web.multipart.MultipartFile;
 
