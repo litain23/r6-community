@@ -4,8 +4,8 @@ import lombok.Data;
 
 @Data
 public class PostModifyResponseDto {
-    long postId;
     String message;
+    long postId;
 
     public PostModifyResponseDto(String message, long postId) {
         this.message = message;

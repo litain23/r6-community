@@ -1,8 +1,10 @@
 package me.r6_search.controller;
 
 import lombok.RequiredArgsConstructor;
+import me.r6_search.dto.comment.CommentModifyResponseDto;
 import me.r6_search.dto.comment.CommentSaveRequestDto;
 import me.r6_search.dto.comment.CommentUpdateRequestDto;
+import me.r6_search.exception.user.UserAuthenticationException;
 import me.r6_search.service.CommentService;
 import me.r6_search.config.UserProfileAnnotation;
 import me.r6_search.model.userprofile.UserProfile;
@@ -15,35 +17,27 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping("/comment")
-    public long makeComment(@RequestBody CommentSaveRequestDto requestDto,
-                            @UserProfileAnnotation UserProfile userProfile) throws IllegalAccessException {
-        if(userProfile == null) {
-            throw new IllegalAccessException("댓글 작성 권한이 없습니다.");
-        }
-        return commentService.saveComment(requestDto, userProfile);
+    public CommentModifyResponseDto makeComment(@RequestBody CommentSaveRequestDto requestDto,
+                                                @UserProfileAnnotation UserProfile userProfile) {
+        long commentId = commentService.saveComment(requestDto, userProfile);
+        return new CommentModifyResponseDto("댓글이 작성되었습니다", commentId);
     }
 
 
     @PutMapping("/comment/{commentId}")
-    public long modifyComment(@PathVariable long commentId,
+    public CommentModifyResponseDto modifyComment(@PathVariable long commentId,
                               @RequestBody CommentUpdateRequestDto requestDto,
-                              @UserProfileAnnotation UserProfile userProfile) throws IllegalAccessException {
+                              @UserProfileAnnotation UserProfile userProfile) {
+        commentService.modifyComment(commentId, requestDto, userProfile);
+        return new CommentModifyResponseDto("댓글이 수정되었습니다.", commentId);
 
-        if(userProfile == null) {
-            throw new IllegalAccessException("댓글 수정 권한이 없습니다.");
-        }
-
-        return commentService.modifyComment(commentId, requestDto, userProfile);
     }
 
     @DeleteMapping("/comment/{commentId}")
-    public long deleteComment(@PathVariable long commentId,
-                              @UserProfileAnnotation UserProfile userProfile) throws IllegalAccessException {
-
-        if(userProfile == null) {
-            throw new IllegalAccessException("댓글 삭제 권한이 없습니다.");
-        }
-        return commentService.deleteComment(commentId, userProfile);
+    public CommentModifyResponseDto deleteComment(@PathVariable long commentId,
+                              @UserProfileAnnotation UserProfile userProfile) {
+        commentService.deleteComment(commentId, userProfile);
+        return new CommentModifyResponseDto("댓글이 삭제되었습니다.", commentId);
     }
 
 }
