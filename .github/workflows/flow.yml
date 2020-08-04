@@ -55,4 +55,13 @@ jobs:
             --region ap-northeast-2 \
             buildFile.zip s3://${{ secrets.AWS_S3_BUCKET_NAME }}
       - name: Deploy EC2
-        run: echo "deploy ec2 "
+        env:
+          AWS_ACCES_KEY_ID=${{ secrets.AWS_DEPLOY }}
+          AWS_SECRET_ACCES_KEY=${{ secrets.AWS_DEPLOY_KEY }}
+        run: |
+          aws deploy create_deployment \
+            --application-name codedeploy-from-s3
+            --deployment-group-name codedeploy-from-s3 \
+            --s3-location bucket=${{ secrets.AWS_S3_BUCKET_NAME }},key=buildFile.zip,bundleType=zip
+
+

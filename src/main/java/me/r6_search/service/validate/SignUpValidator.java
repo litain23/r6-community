@@ -25,7 +25,7 @@ public class SignUpValidator implements ConstraintValidator<SignUpValid, Object>
     public boolean isValid(Object value, ConstraintValidatorContext context) {
         SignUpRequestDto dto = (SignUpRequestDto)value;
         String idRegex= "^[a-zA-Z0-9][a-zA-Z0-9._-]{3,}$";
-        String pwRegex= "^(?=.*[0-9])(?=.*[a-zA-Z])(?=\\S+$) .{8,}$";
+        String pwRegex= "^(?=.*[0-9])(?=.*[a-zA-Z])(?=\\S+$).{8,}$";
         if(!dto.getUsername().matches(idRegex)) {
             context.buildConstraintViolationWithTemplate("아이디는 4글자이상, 영문, 숫자, '.', '_', '-' 만 가능합니다.")
                     .addConstraintViolation()
