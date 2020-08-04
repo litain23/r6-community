@@ -1,0 +1,58 @@
+# This workflow will build a Java project with Gradle
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+
+name: Java CI with Gradle
+
+on:
+  push:
+    branches: [ master, dev ]
+  pull_request:
+    branches: [ master, dev ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Grant execute permission for gradlew
+        run: |
+          chmod +x gradlew
+          ./gradlew build
+      - name: If failure then upload test reports
+        if: failure()
+        run: |
+          TARBALL_BASENAME="r6-community-report"
+          TARBALL="$TARBALL_BASENAME.tar"
+
+          echo 'Collecting the test report'
+          find . -path '*/build/reports/tests' -type d \
+            -exec tar rf "$TARBALL" \
+              --xform="s:./:$TARBALL_BASENAME/:" \
+              --xform='s:/build/reports/tests::' \
+              {} ';'
+
+          echo 'Compressing the test reports .. '
+          gzip "$TARBALL"
+
+          echo 'Uploading the test reports .. '
+          curl -F "file=@$TARBALL.gz" 'https://file.io/'
+          echo
+          echo 'Download the test reports from the URL above.'
+      - name: Zip build file and deploy sh
+        run: |
+          zip buildFile.zip ./deploy-community.sh ./appspec.yml ./build/libs/r6-community-*.jar
+      - name: Upload build file to S3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_S3_UPLOAD }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_S3_UPLOAD_KEY }}
+        run: |
+          aws s3 cp \
+            --region ap-northeast-2 \
+            buildFile.zip s3://${{ secrets.AWS_S3_BUCKET_NAME }}
+      - name: Deploy EC2
+        run: echo "deploy ec2"
