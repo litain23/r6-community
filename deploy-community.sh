@@ -3,8 +3,6 @@ PROJECT_NAME=r6-community
 
 cd $REPOSITORY/$PROJECT_NAME
 
-chmod +x ./gradlew
-
 CURRENT_PID=$(pgrep -f r6-community-*.jar)
 
 echo "RUNNING PID : $CURRENT_PID"

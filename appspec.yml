@@ -13,6 +13,6 @@ permissions:
 
 hooks:
   AfterInstall:
-    - location: deploy_commuunity.sh
+    - location: deploy-community.sh
       timeout: 60
       runas: root

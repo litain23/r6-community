@@ -45,7 +45,8 @@ jobs:
           echo 'Download the test reports from the URL above.'
       - name: Zip build file and deploy sh
         run: |
-          zip buildFile.zip ./deploy-community.sh ./appspec.yml ./build/libs/r6-community-*.jar
+          mv ./build/libs/r6-community-*.jar ./
+          zip buildFile.zip ./deploy-community.sh ./appspec.yml ./r6-community-*.jar
       - name: Upload build file to S3
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_S3_UPLOAD }}
