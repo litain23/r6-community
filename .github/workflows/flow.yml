@@ -53,7 +53,7 @@ jobs:
         run: |
           aws s3 cp \
             --region ap-northeast-2 \
-            buildFile.zip s3://${{ secrets.AWS_S3_BUCKET_NAME }}
+            buildFile.zip s3://${{ secrets.AWS_S3_BUCKET_NAME }}/community-build/
       - name: Configure aws credential
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -65,6 +65,6 @@ jobs:
           aws deploy create-deployment \
             --application-name codedeploy-from-s3 \
             --deployment-group-name codedeploy-from-s3 \
-            --s3-location bucket=${{ secrets.AWS_S3_BUCKET_NAME }},key=buildFile.zip,bundleType=zip
+            --s3-location bucket=${{ secrets.AWS_S3_BUCKET_NAME }},key=community-build/buildFile.zip,bundleType=zip
 
 
