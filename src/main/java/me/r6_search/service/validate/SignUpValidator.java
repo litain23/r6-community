@@ -24,17 +24,27 @@ public class SignUpValidator implements ConstraintValidator<SignUpValid, Object>
     @Override
     public boolean isValid(Object value, ConstraintValidatorContext context) {
         SignUpRequestDto dto = (SignUpRequestDto)value;
-//        if(dto.getUsername().matches('/')) {
-//
-//        } else if(dto.getPassword().matches('/')) {
-//
-//        } else
-        if(userProfileRepository.findByUsername(dto.getUsername()).isPresent()) {
-            context.buildConstraintViolationWithTemplate("이미등록된아이디입니다.")
+        String idRegex= "^[a-zA-Z0-9][a-zA-Z0-9._-]{3,}$";
+        String pwRegex= "^(?=.*[0-9])(?=.*[a-zA-Z])(?=\\S+$) .{8,}$";
+        if(!dto.getUsername().matches(idRegex)) {
+            context.buildConstraintViolationWithTemplate("아이디는 4글자이상, 영문, 숫자, '.', '_', '-' 만 가능합니다.")
+                    .addConstraintViolation()
+                    .disableDefaultConstraintViolation();
+            return false;
+        } else if(!dto.getPassword().matches(pwRegex)) {
+            context.buildConstraintViolationWithTemplate("비밀번호는 숫자와 영문자를 합쳐서 8글자 이상이어야 됩니다.")
+                    .addConstraintViolation()
+                    .disableDefaultConstraintViolation();
+            return false;
+        } else if(userProfileRepository.findByUsername(dto.getUsername()).isPresent()) {
+            context.buildConstraintViolationWithTemplate("이미 등록된 아이디입니다.")
                     .addConstraintViolation()
                     .disableDefaultConstraintViolation();
             return false;
         } else if(userProfileRepository.findByEmail(dto.getEmail()).isPresent()) {
+            context.buildConstraintViolationWithTemplate("이미 등록된 이메일입니다.")
+                    .addConstraintViolation()
+                    .disableDefaultConstraintViolation();
             return false;
         }
         return true;

@@ -7,11 +7,26 @@ import me.r6_search.exception.user.UserSignUpValidateException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import javax.validation.ConstraintViolationException;
+import java.util.ArrayList;
+
 @ControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    protected ResponseEntity<ErrorResponseDto> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        e.printStackTrace();
+        BindingResult bindingResult = e.getBindingResult();
+        String message = bindingResult.getAllErrors().get(0).getDefaultMessage();
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(message, 400);
+        return new ResponseEntity<>(errorResponseDto, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(BadCredentialsException.class)
     protected ResponseEntity<ErrorResponseDto> handleBadCredentialsException(BadCredentialsException e) {
         e.printStackTrace();
