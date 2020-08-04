@@ -22,5 +22,5 @@ JAR_NAME=$(ls -tr $REPOSITORY/$PROJECT_NAME | grep *.jar | tail -n 1)
 sudo nohup java -jar \
   -Dspring.config.location=classpath:/application.properties,/home/ubuntu/codedeploy/r6-community/application-real-db.properties \
   -Dspring.profiles.active=real \
-  $REPOSITORY/$PROJECT_NAME/$JAR_NAME 2>&1 &
+  $REPOSITORY/$PROJECT_NAME/$JAR_NAME > /dev/null 2> /dev/null < /dev/null &
 
