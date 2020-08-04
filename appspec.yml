@@ -16,3 +16,6 @@ hooks:
     - location: deploy-community.sh
       timeout: 60
       runas: root
+  ValidateService:
+    - location: server-check.sh
+      timeout: 60
