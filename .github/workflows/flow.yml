@@ -55,17 +55,14 @@ jobs:
 #          aws s3 cp \
 #            --region ap-northeast-2 \
 #            buildFile.zip s3://${{ secrets.AWS_S3_BUCKET_NAME }}/community-build/
-#      - name: Configure aws credential
-#        uses: aws-actions/configure-aws-credentials@v1
-#        with:
-#          aws-access-key-id: ${{ secrets.AWS_DEPLOY }}
-#          aws-secret-access-key: ${{ secrets.AWS_DEPLOY_KEY }}
-#          aws-region: ap-northeast-2
+      - name: Configure aws credential
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_DEPLOY }}
+          aws-secret-access-key: ${{ secrets.AWS_DEPLOY_KEY }}
+          aws-region: ap-northeast-2
       - name: Deploy ec2
         run: |
-#          ls -al
-#          chmod +x deploy-start.sh
-#          ./deploy-start.sh
           aws deploy create-deployment \
             --application-name codedeploy-from-s3 \
             --deployment-group-name codedeploy-from-s3 \
