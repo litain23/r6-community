@@ -75,7 +75,7 @@ jobs:
 
           sleep 60
 
-          IS_SUCCESS=$(aws deploy --deployment-id $DEPLOYMENT_ID > jq '.deploymentInfo.status')
+          IS_SUCCESS=$(aws deploy get-deployment --deployment-id $DEPLOYMENT_ID > jq '.deploymentInfo.status')
           if [ "$IS_SUCCESS" = "Succeeded" ];
           then
             echo "SUCCESS DEPLOY!"
