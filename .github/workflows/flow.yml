@@ -63,7 +63,7 @@ jobs:
           aws-region: ap-northeast-2
       - name: Deploy ec2
         run: |
-          IS_SUCCESS=$(aws deploy get-deployment --deployment-id d-BWX3QXWU4 | jq '.deploymentInfo.status')
+          IS_SUCCESS=$(aws deploy get-deployment --deployment-id d-BWX3QXWU4 | jq -r '.deploymentInfo.status')
 
           echo $IS_SUCCESS
 
