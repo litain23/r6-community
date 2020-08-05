@@ -76,7 +76,6 @@ jobs:
           sleep 60
 
           IS_SUCCESS=$(aws deploy --deployment-id $DEPLOYMENT_ID > jq '.deploymentInfo.status')
-#          IS_SUCCESS=$(aws deploy --deployment-id $DEPLOYMENT_ID | python -c "import sys, json; print("json.load(sys.stdin)['deploymentInfo']['status'])")
           if [ "$IS_SUCCESS" = "Succeeded" ];
           then
             echo "SUCCESS DEPLOY!"
