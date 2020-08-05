@@ -63,7 +63,8 @@ jobs:
 #          aws-region: ap-northeast-2
       - name: Deploy ec2
         run: |
-          chmod +x ./deploy-start.sh
+          ls -al
+          chmod +x deploy-start.sh
           ./deploy-start.sh
 #          DEPLOYMENT_ID=$((aws deploy create-deployment \
 #            --application-name codedeploy-from-s3 \
