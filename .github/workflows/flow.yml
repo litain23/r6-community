@@ -70,16 +70,16 @@ jobs:
 
           cat deploymentId.txt
 
-          DEPLOYMENT_ID=$(cat deploymentId.txt | jp '.deploymentId')
+          DEPLOYMENT_ID=$(cat deploymentId.txt | jq '.deploymentId')
           echo $DEPLOYMENT_ID
-#
-#          sleep 60
-#
+
+          sleep 60
+
+          IS_SUCCESS=$(aws deploy --deployment-id $DEPLOYMENT_ID > jq '.deploymentInfo.status')
 #          IS_SUCCESS=$(aws deploy --deployment-id $DEPLOYMENT_ID | python -c "import sys, json; print("json.load(sys.stdin)['deploymentInfo']['status'])")
-#
-#          if [ "$IS_SUCCESS" = "Succeeded" ];
-#          then
-#            echo "SUCCESS DEPLOY!"
-#          else
-#            echo "FAIL DEPLOY!"
-#          fi
+          if [ "$IS_SUCCESS" = "Succeeded" ];
+          then
+            echo "SUCCESS DEPLOY!"
+          else
+            echo "FAIL DEPLOY!"
+          fi
