@@ -19,55 +19,55 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-      - name: Grant execute permission for gradlew
-        run: |
-          chmod +x gradlew
-          ./gradlew build
-      - name: If failure then upload test reports
-        if: failure()
-        run: |
-          TARBALL_BASENAME="r6-community-report"
-          TARBALL="$TARBALL_BASENAME.tar"
-
-          echo 'Collecting the test report'
-          find . -path '*/build/reports/tests' -type d \
-            -exec tar rf "$TARBALL" \
-              --xform="s:./:$TARBALL_BASENAME/:" \
-              --xform='s:/build/reports/tests::' \
-              {} ';'
-
-          echo 'Compressing the test reports .. '
-          gzip "$TARBALL"
-
-          echo 'Uploading the test reports .. '
-          curl -F "file=@$TARBALL.gz" 'https://file.io/'
-          echo
-          echo 'Download the test reports from the URL above.'
-      - name: Zip build file and deploy sh
-        run: |
-          mv ./build/libs/r6-community-*.jar ./
-          zip buildFile.zip ./deploy-community.sh ./appspec.yml ./r6-community-*.jar ./server-check.sh
-      - name: Upload build file to S3
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_S3_UPLOAD }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_S3_UPLOAD_KEY }}
-        run: |
-          aws s3 cp \
-            --region ap-northeast-2 \
-            buildFile.zip s3://${{ secrets.AWS_S3_BUCKET_NAME }}/community-build/
-      - name: Configure aws credential
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_DEPLOY }}
-          aws-secret-access-key: ${{ secrets.AWS_DEPLOY_KEY }}
-          aws-region: ap-northeast-2
+#      - name: Grant execute permission for gradlew
+#        run: |
+#          chmod +x gradlew
+#          ./gradlew build
+#      - name: If failure then upload test reports
+#        if: failure()
+#        run: |
+#          TARBALL_BASENAME="r6-community-report"
+#          TARBALL="$TARBALL_BASENAME.tar"
+#
+#          echo 'Collecting the test report'
+#          find . -path '*/build/reports/tests' -type d \
+#            -exec tar rf "$TARBALL" \
+#              --xform="s:./:$TARBALL_BASENAME/:" \
+#              --xform='s:/build/reports/tests::' \
+#              {} ';'
+#
+#          echo 'Compressing the test reports .. '
+#          gzip "$TARBALL"
+#
+#          echo 'Uploading the test reports .. '
+#          curl -F "file=@$TARBALL.gz" 'https://file.io/'
+#          echo
+#          echo 'Download the test reports from the URL above.'
+#      - name: Zip build file and deploy sh
+#        run: |
+#          mv ./build/libs/r6-community-*.jar ./
+#          zip buildFile.zip ./deploy-community.sh ./appspec.yml ./r6-community-*.jar ./server-check.sh
+#      - name: Upload build file to S3
+#        env:
+#          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_S3_UPLOAD }}
+#          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_S3_UPLOAD_KEY }}
+#        run: |
+#          aws s3 cp \
+#            --region ap-northeast-2 \
+#            buildFile.zip s3://${{ secrets.AWS_S3_BUCKET_NAME }}/community-build/
+#      - name: Configure aws credential
+#        uses: aws-actions/configure-aws-credentials@v1
+#        with:
+#          aws-access-key-id: ${{ secrets.AWS_DEPLOY }}
+#          aws-secret-access-key: ${{ secrets.AWS_DEPLOY_KEY }}
+#          aws-region: ap-northeast-2
       - name: Deploy ec2
         run: |
           DEPLOYMENT_ID=$(aws deploy create-deployment \
             --application-name codedeploy-from-s3 \
             --deployment-group-name codedeploy-from-s3 \
-            --s3-location bucket=${{ secrets.AWS_S3_BUCKET_NAME }},key=community-build/buildFile.zip,bundleType=zip \
-          | python -c "import sys, json; print("json.load(sys.stdin)['depoymentId'])")
+            --s3-location bucket=${{ secrets.AWS_S3_BUCKET_NAME }},key=community-build/buildFile.zip,bundleType=zip
+          | python -c "import sys, json; print("json.load(sys.stdin)['deploymentId'])")
 
           sleep 60
 
