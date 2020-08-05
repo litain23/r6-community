@@ -81,7 +81,7 @@ jobs:
 
           echo $IS_SUCCESS
 
-          if [ $IS_SUCCESS = "Succeeded" ];
+          if [ "$IS_SUCCESS" = "Succeeded" ];
           then
             echo "SUCCESS DEPLOY!"
           else
