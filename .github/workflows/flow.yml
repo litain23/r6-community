@@ -19,42 +19,42 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-#      - name: Grant execute permission for gradlew
-#        run: |
-#          chmod +x gradlew
-#          ./gradlew build
-#      - name: If failure then upload test reports
-#        if: failure()
-#        run: |
-#          TARBALL_BASENAME="r6-community-report"
-#          TARBALL="$TARBALL_BASENAME.tar"
-#
-#          echo 'Collecting the test report'
-#          find . -path '*/build/reports/tests' -type d \
-#            -exec tar rf "$TARBALL" \
-#              --xform="s:./:$TARBALL_BASENAME/:" \
-#              --xform='s:/build/reports/tests::' \
-#              {} ';'
-#
-#          echo 'Compressing the test reports .. '
-#          gzip "$TARBALL"
-#
-#          echo 'Uploading the test reports .. '
-#          curl -F "file=@$TARBALL.gz" 'https://file.io/'
-#          echo
-#          echo 'Download the test reports from the URL above.'
-#      - name: Zip build file and deploy sh
-#        run: |
-#          mv ./build/libs/r6-community-*.jar ./
-#          zip buildFile.zip ./deploy-community.sh ./appspec.yml ./r6-community-*.jar ./server-check.sh
-#      - name: Upload build file to S3
-#        env:
-#          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_S3_UPLOAD }}
-#          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_S3_UPLOAD_KEY }}
-#        run: |
-#          aws s3 cp \
-#            --region ap-northeast-2 \
-#            buildFile.zip s3://${{ secrets.AWS_S3_BUCKET_NAME }}/community-build/
+      - name: Grant execute permission for gradlew
+        run: |
+          chmod +x gradlew
+          ./gradlew build
+      - name: If failure then upload test reports
+        if: failure()
+        run: |
+          TARBALL_BASENAME="r6-community-report"
+          TARBALL="$TARBALL_BASENAME.tar"
+
+          echo 'Collecting the test report'
+          find . -path '*/build/reports/tests' -type d \
+            -exec tar rf "$TARBALL" \
+              --xform="s:./:$TARBALL_BASENAME/:" \
+              --xform='s:/build/reports/tests::' \
+              {} ';'
+
+          echo 'Compressing the test reports .. '
+          gzip "$TARBALL"
+
+          echo 'Uploading the test reports .. '
+          curl -F "file=@$TARBALL.gz" 'https://file.io/'
+          echo
+          echo 'Download the test reports from the URL above.'
+      - name: Zip build file and deploy sh
+        run: |
+          mv ./build/libs/r6-community-*.jar ./
+          zip buildFile.zip ./deploy-community.sh ./appspec.yml ./r6-community-*.jar ./server-check.sh
+      - name: Upload build file to S3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_S3_UPLOAD }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_S3_UPLOAD_KEY }}
+        run: |
+          aws s3 cp \
+            --region ap-northeast-2 \
+            buildFile.zip s3://${{ secrets.AWS_S3_BUCKET_NAME }}/community-build/
       - name: Configure aws credential
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -63,9 +63,19 @@ jobs:
           aws-region: ap-northeast-2
       - name: Deploy ec2
         run: |
-          IS_SUCCESS=$(aws deploy get-deployment --deployment-id d-BWX3QXWU4 | jq -r '.deploymentInfo.status')
+          aws deploy create-deployment \
+            --application-name codedeploy-from-s2 \
+            --deployment-group-name codedeploy-from-s2 \
+            --s2-location bucket=${{ secrets.AWS_S3_BUCKET_NAME }},key=community-build/buildFile.zip,bundleType=zip > deploymentId.txt
 
-          echo $IS_SUCCESS
+          cat deploymentId.txt
+          DEPLOYMENT_ID=$(cat deploymentId.txt | jq -r '.deploymentId')
+
+          sleep 60
+
+          IS_SUCCESS=$(aws deploy get-deployment --deployment-id $DEPLOYMENT_ID | jq -r '.deploymentInfo.status')
+
+          echo $IS_SUCCESS;
 
           if [ "$IS_SUCCESS" = "Succeeded" ];
           then
