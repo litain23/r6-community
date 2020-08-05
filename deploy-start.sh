@@ -1,5 +1,3 @@
-#!/bin/bash
-
 DEPLOYMENT_ID=$(aws deploy create-deployment \
   --application-name codedeploy-from-s3 \
   --deployment-group-name codedeploy-from-s3 \
