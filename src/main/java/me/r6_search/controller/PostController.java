@@ -31,20 +31,12 @@ public class PostController {
     @PostMapping(value = "/post", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public PostModifyResponseDto makePost(PostSaveRequestDto requestDto,
                                           @UserProfileAnnotation UserProfile userProfile) {
-        checkFilesExtension(requestDto.getFiles());
+//        checkFilesExtension(requestDto.getFiles());
         Long postId = postService.savePost(requestDto, userProfile);
         return new PostModifyResponseDto("게시글이 생성되었습니다", postId);
     }
 
-    private void checkFilesExtension(MultipartFile[] files) {
-        if(files == null) return;
-        for(MultipartFile file : files) {
-            String fileName = file.getOriginalFilename();
-            String extension = fileName.substring(fileName.lastIndexOf('.') + 1);
-            if(extension.equals("jpeg") || extension.equals("jpg") || extension.equals("png") || extension.equals("gif")) continue;
-            else throw new PostIllegalFileExtensionException("파일 확장자는 jpeg, jpg, png, gif 만 가능합니다");
-        }
-    }
+
 
     @PutMapping("/post/{id}")
     public PostModifyResponseDto modifyPost(@PathVariable long id,

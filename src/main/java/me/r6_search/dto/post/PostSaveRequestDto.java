@@ -6,12 +6,14 @@ import me.r6_search.model.post.PostType;
 import me.r6_search.model.userprofile.UserProfile;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Data
 public class PostSaveRequestDto {
     String title;
     String content;
     String type;
-    MultipartFile[] files;
+    List<String> imgSrcList;
 
     public Post toEntity(UserProfile userProfile) {
         return Post.builder()

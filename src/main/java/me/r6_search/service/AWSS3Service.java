@@ -5,6 +5,7 @@ import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.RequiredArgsConstructor;
+import me.r6_search.model.imgsrc.ImgSrcRepository;
 import me.r6_search.utils.RandomStringGenerator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,10 +21,13 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 public class AWSS3Service {
+    private final ImgSrcService imgSrcService;
     private final AmazonS3 amazonS3;
+    private final static String CDN_URL = "https://d13wxwpxw6qcg.cloudfront.net/";
 
     @Value("#{systemEnvironment['aws_s3_bucket_name']}")
     private String bucketName;
+
 
     public List<String> uploadFile(MultipartFile[] files) {
         if(files == null) return Collections.EMPTY_LIST;
@@ -32,7 +36,7 @@ public class AWSS3Service {
         try {
             for(MultipartFile file : files) {
                 File saveFile = multipartFileToFile(file);
-                fileNameList.add(uploadFileToS3Bucket(bucketName, saveFile));
+                fileNameList.add(CDN_URL + uploadFileToS3Bucket(bucketName, saveFile));
                 saveFile.delete();
             }
         } catch (IOException e) {
@@ -42,6 +46,8 @@ public class AWSS3Service {
         } catch (SdkClientException e) {
             throw new RuntimeException("S3 Connect fail");
         }
+
+        imgSrcService.saveImgSrc(fileNameList);
         return fileNameList;
     }
 

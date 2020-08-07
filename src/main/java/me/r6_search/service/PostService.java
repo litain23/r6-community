@@ -30,8 +30,7 @@ public class PostService {
     private final PostRecommendRepository postRecommendRepository;
     private final PostRepository postRepository;
     private final CommentService commentService;
-    private final AWSS3Service awss3Service;
-    private final ImgSrcRepository imgSrcRepository;
+    private final ImgSrcService imgSrcService;
 
     private final int VIEW_POST_CNT = 20;
 
@@ -107,13 +106,8 @@ public class PostService {
         Post post = requestDto.toEntity(userProfile);
         postRepository.save(post);
 
-        if(requestDto.getFiles() != null) {
-            List<String> fileNameList = awss3Service.uploadFile(requestDto.getFiles());
-            for(String fileName : fileNameList) {
-                ImgSrc imgSrc = new ImgSrc(post, fileName);
-                imgSrcRepository.save(imgSrc);
-                post.addImgSrc(imgSrc);
-            }
+        if(requestDto.getImgSrcList() != null) {
+            imgSrcService.updateImgSrc(requestDto.getImgSrcList(), post);
         }
         return post.getId();
     }

@@ -17,7 +17,6 @@ public class ImgSrc {
 
     @ManyToOne
     @JoinColumn(name="post_id")
-    @NotNull
     Post post;
 
     @NotNull
@@ -29,5 +28,9 @@ public class ImgSrc {
     public ImgSrc(Post post, String src) {
         this.post = post;
         this.src = src;
+    }
+
+    public void updatePost(Post post) {
+        this.post = post;
     }
 }

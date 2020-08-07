@@ -34,6 +34,7 @@ public class Post {
 
     private String title;
 
+    @Column(length = 15000)
     private String content;
 
     private int viewCnt;
