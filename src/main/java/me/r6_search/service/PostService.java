@@ -39,7 +39,7 @@ public class PostService {
         long postCnt = postRepository.countByType(PostType.valueOf(type));
         // 페이지가 수가 잘못되었을 때는 그냥 page 를 1로 하고 진행
         if(page <= 0 || postCnt / 20 + 1 < page) {
-            page = 1;
+            throw new BoardException("해당 페이지가 존재하지 않습니다");
         }
 
         PageMetaDto metaDto = PageMetaDto.builder()
@@ -101,7 +101,9 @@ public class PostService {
 
     @Transactional
     public Long savePost(PostSaveRequestDto requestDto, UserProfile userProfile) throws RuntimeException{
-        if(requestDto.getType() == "notice") throw new BoardException("권한이 없습니다");
+        if(requestDto.getType() == "notice") {
+            throw new BoardException("권한이 없습니다");
+        }
 
         Post post = requestDto.toEntity(userProfile);
         postRepository.save(post);
