@@ -6,6 +6,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.RequiredArgsConstructor;
 import me.r6_search.model.imgsrc.ImgSrcRepository;
+import me.r6_search.utils.HashFunction;
 import me.r6_search.utils.RandomStringGenerator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,10 +36,12 @@ public class AWSS3Service {
         if(files == null) return Collections.EMPTY_LIST;
 
         List<String> fileNameList = new ArrayList<>();
+        List<String> originFileNameList = new ArrayList<>();
         try {
             for(MultipartFile file : files) {
                 File saveFile = multipartFileToFile(file);
                 fileNameList.add(CDN_URL + uploadFileToS3Bucket(bucketName, saveFile));
+                originFileNameList.add(saveFile.getName());
                 saveFile.delete();
             }
         } catch (IOException e) {
@@ -45,9 +50,11 @@ public class AWSS3Service {
             throw new RuntimeException("File upload fail");
         } catch (SdkClientException e) {
             throw new RuntimeException("S3 Connect fail");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Img Hash Fail");
         }
 
-        imgSrcService.saveImgSrc(fileNameList);
+        imgSrcService.saveImgSrc(fileNameList, originFileNameList);
         return fileNameList;
     }
 
@@ -62,11 +69,11 @@ public class AWSS3Service {
         return file;
     }
 
-    private String uploadFileToS3Bucket(String bucketName, File file) throws SdkClientException {
-        RandomStringGenerator stringGenerator = new RandomStringGenerator();
-        String uniqueFileName = stringGenerator.generateRandomString(8) + "_" + file.getName();
-        PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, uniqueFileName, file);
+    private String uploadFileToS3Bucket(String bucketName, File file) throws SdkClientException, NoSuchAlgorithmException {
+        HashFunction hashFunction = new HashFunction();
+        String hashedFileName = hashFunction.generateHashString(LocalDateTime.now() + "_" + file.getName());
+        PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, hashedFileName, file);
         amazonS3.putObject(putObjectRequest);
-        return uniqueFileName;
+        return hashedFileName;
     }
 }

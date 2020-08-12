@@ -31,12 +31,9 @@ public class PostController {
     @PostMapping(value = "/post", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public PostModifyResponseDto makePost(PostSaveRequestDto requestDto,
                                           @UserProfileAnnotation UserProfile userProfile) {
-//        checkFilesExtension(requestDto.getFiles());
         Long postId = postService.savePost(requestDto, userProfile);
         return new PostModifyResponseDto("게시글이 생성되었습니다", postId);
     }
-
-
 
     @PutMapping("/post/{id}")
     public PostModifyResponseDto modifyPost(@PathVariable long id,

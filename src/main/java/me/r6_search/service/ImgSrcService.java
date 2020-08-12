@@ -15,12 +15,15 @@ public class ImgSrcService {
     private final ImgSrcRepository imgSrcRepository;
 
     @Transactional
-    protected void saveImgSrc(List<String> imgFileNameList) {
-        for(String fileName : imgFileNameList) {
+    protected void saveImgSrc(List<String> imgFileNameList, List<String> originImgFileNameList) {
+        for(int i=0;i<imgFileNameList.size();i++) {
+            String originFileName = originImgFileNameList.get(i);
+            String fileName = imgFileNameList.get(i);
+
             ImgSrc imgSrc = ImgSrc.builder()
                     .src(fileName)
+                    .name(originFileName)
                     .build();
-
             imgSrcRepository.save(imgSrc);
         }
     }
@@ -30,8 +33,19 @@ public class ImgSrcService {
         for(String fileName : imgFileNameList) {
             ImgSrc imgSrc = imgSrcRepository.findBySrc(fileName);
             if(imgSrc == null) continue;
+            if(imgSrc.getPost() != null) {
+                // hash 함수가 동일하게 나오면 새로운 값을 만들어서 넣어줌 .. 이럴일을 없겠지..?
+                ImgSrc newImgSrc = ImgSrc.builder()
+                        .src(fileName)
+                        .name("new-image-name")
+                        .post(post)
+                        .build();
 
-            imgSrc.updatePost(post);
+                imgSrcRepository.save(newImgSrc);
+            } else {
+                imgSrc.updatePost(post);
+            }
+
         }
     }
 

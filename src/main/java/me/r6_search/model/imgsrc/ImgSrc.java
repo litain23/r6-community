@@ -22,12 +22,16 @@ public class ImgSrc {
     @NotNull
     String src;
 
+    @NotNull
+    String name;
+
     public ImgSrc() {}
 
     @Builder
-    public ImgSrc(Post post, String src) {
+    public ImgSrc(Post post, String src, String name) {
         this.post = post;
         this.src = src;
+        this.name = name;
     }
 
     public void updatePost(Post post) {
