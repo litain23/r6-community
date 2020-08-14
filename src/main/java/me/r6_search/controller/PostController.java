@@ -10,6 +10,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
+
 @RequiredArgsConstructor
 @RequestMapping("/api/c")
 @RestController
@@ -28,8 +30,8 @@ public class PostController {
         return postService.getPost(id, userProfile);
     }
 
-    @PostMapping(value = "/post", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public PostModifyResponseDto makePost(PostSaveRequestDto requestDto,
+    @PostMapping(value = "/post")
+    public PostModifyResponseDto makePost(@RequestBody @Valid PostSaveRequestDto requestDto,
                                           @UserProfileAnnotation UserProfile userProfile) {
         Long postId = postService.savePost(requestDto, userProfile);
         return new PostModifyResponseDto("게시글이 생성되었습니다", postId);
@@ -37,7 +39,7 @@ public class PostController {
 
     @PutMapping("/post/{id}")
     public PostModifyResponseDto modifyPost(@PathVariable long id,
-                                            @RequestBody PostUpdateRequestDto requestDto,
+                                            @RequestBody @Valid PostUpdateRequestDto requestDto,
                                             @UserProfileAnnotation UserProfile userProfile) {
         Long postId = postService.modifyPost(id, requestDto, userProfile);
         return new PostModifyResponseDto("게시글이 수정되었습니다", postId);
