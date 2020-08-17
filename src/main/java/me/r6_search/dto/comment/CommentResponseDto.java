@@ -10,13 +10,10 @@ import java.util.List;
 @Data
 public class CommentResponseDto {
     long commentId;
-    long parentId;
-    String parentUsername;
     String username;
     String content;
-    List<CommentResponseDto> childComment = new ArrayList<>();
+    List<CommentChildResponseDto> childComment = new ArrayList<>();
     LocalDateTime createdTime;
-    boolean isChild;
 
     public static CommentResponseDto of(Comment comment) {
         CommentResponseDto dto = new CommentResponseDto();

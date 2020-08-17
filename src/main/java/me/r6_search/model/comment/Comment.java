@@ -33,6 +33,8 @@ public class Comment {
 
     private String content;
 
+    private String replayUsername;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "PARENT_COMMENT_ID")
     private Comment parentComment;
@@ -43,11 +45,12 @@ public class Comment {
     public Comment() {}
 
     @Builder
-    public Comment(UserProfile userProfile, Post post, String content, Comment parentComment) {
+    public Comment(UserProfile userProfile, Post post, String content, Comment parentComment, String replayUsername) {
         this.userProfile = userProfile;
         this.post = post;
         this.content = content;
         this.parentComment = parentComment;
+        this.replayUsername = replayUsername;
     }
 
     @CreatedDate

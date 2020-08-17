@@ -1,6 +1,7 @@
 package me.r6_search.service;
 
 import lombok.RequiredArgsConstructor;
+import me.r6_search.dto.comment.CommentChildResponseDto;
 import me.r6_search.model.comment.Comment;
 import me.r6_search.model.comment.CommentRepository;
 import me.r6_search.model.post.Post;
@@ -12,6 +13,7 @@ import me.r6_search.exception.board.CommentIllegalModifyException;
 import me.r6_search.exception.board.CommentNotFoundException;
 import me.r6_search.model.post.PostRepository;
 import me.r6_search.model.userprofile.UserProfile;
+import me.r6_search.model.userprofile.UserProfileRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,42 +25,32 @@ import java.util.stream.Collectors;
 public class CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
+    private final UserProfileService userProfileService;
 
     public List<CommentResponseDto> getCommentListAtPost(long postId) {
         List<Comment> commentList = commentRepository.findByPostId(postId);
         if(commentList == null) return Collections.EMPTY_LIST;
 
-        commentList.sort(Comparator.comparing(Comment::getCreatedTime));
+        Map<Comment, List<Comment>> childCommentMap = commentList.stream()
+                .filter(comment -> comment.getParentComment() != null)
+                .collect(Collectors.groupingBy(comment -> comment.getParentComment()));
+
         List<CommentResponseDto> commentResponseDtoList = new ArrayList<>();
         for(Comment comment : commentList) {
             // 대댓인 경우는 parent comment 가 처리될때, 하위로 들어감
             if(comment.getParentComment() != null) continue;
+            CommentResponseDto responseDto = CommentResponseDto.of(comment);
 
-            List<CommentResponseDto> childResponseDto = getChildCommentList(comment, new ArrayList<CommentResponseDto>());
-            CommentResponseDto parentResponseDto = CommentResponseDto.of(comment);
-            parentResponseDto.setChildComment(childResponseDto);
-            parentResponseDto.setChild(false);
+            List<Comment> childCommentList = childCommentMap.get(comment);
+            childCommentList.sort(Comparator.comparing(Comment::getCreatedTime));
+            for(Comment childComment : childCommentList) {
+                responseDto.getChildComment().add(CommentChildResponseDto.of(childComment));
+            }
 
-            commentResponseDtoList.add(parentResponseDto);
+            commentResponseDtoList.add(responseDto);
         }
         return commentResponseDtoList;
     }
-
-    private List<CommentResponseDto> getChildCommentList(Comment parentComment, List<CommentResponseDto> accCommentList) {
-        List<Comment> childCommentList = parentComment.getChildComment();
-        if(childCommentList != null) {
-            for(Comment childComment : childCommentList) {
-                CommentResponseDto responseDto = CommentResponseDto.of(childComment);
-                responseDto.setParentId(parentComment.getId());
-                responseDto.setParentUsername(parentComment.getUserProfile().getUsername());
-                responseDto.setChild(true);
-                accCommentList.add(responseDto);
-                getChildCommentList(childComment, accCommentList);
-            }
-        }
-        return accCommentList;
-    }
-
 
     @Transactional
     public long saveComment(CommentSaveRequestDto requestDto, UserProfile userProfile) {
@@ -70,6 +62,7 @@ public class CommentService {
         long commentId = commentRepository.save(comment).getId();
         if(requestDto.getParentCommentId() != 0) {
             Comment parentComment = commentRepository.findById(requestDto.getParentCommentId()).orElseThrow(() -> new CommentNotFoundException("댓글이 존재하지 않습니다."));
+            userProfileService.getUserProfile(requestDto.getReplayUsername());
             parentComment.addChildComment(comment);
             comment.setParentComment(parentComment);
         }
