@@ -9,9 +9,9 @@ import java.util.List;
 
 @Data
 public class PostSaveRequestDto {
-    @NotBlank
+    @NotBlank(message = "제목은 한글자 이상 포함되어야 합니다.")
     String title;
-    @NotBlank
+    @NotBlank(message = "내용은 한글자 이상 포함되어야 합니다.")
     String content;
     String type;
     List<String> imgSrcList;

@@ -42,11 +42,12 @@ public class CommentService {
             CommentResponseDto responseDto = CommentResponseDto.of(comment);
 
             List<Comment> childCommentList = childCommentMap.get(comment);
-            childCommentList.sort(Comparator.comparing(Comment::getCreatedTime));
-            for(Comment childComment : childCommentList) {
-                responseDto.getChildComment().add(CommentChildResponseDto.of(childComment));
+            if(childCommentList != null) {
+                childCommentList.sort(Comparator.comparing(Comment::getCreatedTime));
+                for(Comment childComment : childCommentList) {
+                    responseDto.getChildComment().add(CommentChildResponseDto.of(childComment));
+                }
             }
-
             commentResponseDtoList.add(responseDto);
         }
         return commentResponseDtoList;
