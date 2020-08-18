@@ -52,7 +52,7 @@ public class PostController {
         return new PostModifyResponseDto("게시글이 삭제되었습니다", postId);
     }
 
-    @PostMapping("/post/{id}/recommend/")
+    @PostMapping("/post/{id}/recommend")
     public PostRecommendResponseDto toggleRecommendPost(@PathVariable long id,
                               @UserProfileAnnotation UserProfile userProfile) {
         boolean isRecommend = postService.toggleRecommendPost(id, userProfile);
