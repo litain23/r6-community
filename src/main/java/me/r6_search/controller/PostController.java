@@ -57,9 +57,9 @@ public class PostController {
                               @UserProfileAnnotation UserProfile userProfile) {
         boolean isRecommend = postService.toggleRecommendPost(id, userProfile);
         if(isRecommend) {
-            return new PostRecommendResponseDto("이 게시글을 추천을 하였습니다.");
+            return new PostRecommendResponseDto("이 게시글을 추천을 하였습니다.", true);
         } else {
-            return new PostRecommendResponseDto("이 게시글 추천을 취소하였습니다.");
+            return new PostRecommendResponseDto("이 게시글 추천을 취소하였습니다.", false);
         }
     }
 }
