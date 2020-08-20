@@ -1,12 +1,12 @@
 package me.r6_search.controller;
 
 import com.sun.mail.iap.Response;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import me.r6_search.config.UserProfileAnnotation;
-import me.r6_search.dto.JwtRequestDto;
-import me.r6_search.dto.JwtResponseDto;
-import me.r6_search.dto.PasswordChangeRequestDto;
-import me.r6_search.dto.SignUpRequestDto;
+import me.r6_search.dto.*;
 import me.r6_search.exception.user.UserAuthenticationException;
 import me.r6_search.exception.user.UserSignUpValidateException;
 import me.r6_search.model.userprofile.UserProfile;
@@ -32,6 +32,21 @@ public class JwtAuthenticationController {
 
     private final UserProfileService userProfileService;
 
+    @PostMapping("/refresh")
+    public ResponseEntity refreshToken(@RequestBody JwtRefreshRequestDto requestDto) {
+        String refreshToken = requestDto.getRefreshToken();
+        try {
+            jwtTokenProvider.validateRefreshToken(refreshToken);
+            String username = jwtTokenProvider.getUsernameUsingRefreshToken(refreshToken);
+            String token = jwtTokenProvider.generateToken(username);
+            return ResponseEntity.ok(new JwtResponseDto(token, refreshToken));
+        } catch (ExpiredJwtException e) {
+            return new ResponseEntity("{\"message\": \"리프레쉬토큰이 만료되었습니다.\"}", HttpStatus.FORBIDDEN);
+        } catch (JwtException e) {
+            return new ResponseEntity("{\"message\": \"인증에 실패하였습니다.\"}", HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @PostMapping("/signin")
     public ResponseEntity signin(@RequestBody JwtRequestDto authenticationRequest) {
         try {
@@ -40,7 +55,8 @@ public class JwtAuthenticationController {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
 
             String token = jwtTokenProvider.generateToken(username);
-            return ResponseEntity.ok(new JwtResponseDto(token));
+            String refreshToken = jwtTokenProvider.generateRefreshToken(username);
+            return ResponseEntity.ok(new JwtResponseDto(token, refreshToken));
         } catch (AuthenticationException e) {
             throw new UserAuthenticationException("아이디 또는 비밀번호가 일치하지 않습니다");
         }

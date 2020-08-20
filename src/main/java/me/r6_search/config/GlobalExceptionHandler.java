@@ -1,5 +1,6 @@
 package me.r6_search.config;
 
+import io.jsonwebtoken.JwtException;
 import me.r6_search.dto.ErrorResponseDto;
 import me.r6_search.exception.board.*;
 import me.r6_search.exception.user.UserAuthenticationException;

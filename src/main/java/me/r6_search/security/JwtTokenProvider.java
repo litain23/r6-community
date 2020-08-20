@@ -1,13 +1,9 @@
 package me.r6_search.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -26,27 +22,38 @@ public class JwtTokenProvider {
     private long JWT_TOKEN_EXPIRATION_SECOND;
 
     @Value("${jwt.secret}")
-    private String secret;
+    private String JWT_SECRET;
+
+    @Value("${jwt.refresh-expiration-time}")
+    private long JWT_REFRESH_TOKEN_EXPIRATION_SECOND;
+
+    @Value("${jwt.refresh-secret}")
+    private String JWT_REFRESH_SECRET;
 
     private final UserProfileDetailsService userProfileDetailsService;
 
-    private SecretKey getSignKey() {
+    private SecretKey getSignKey(String secret) {
        byte[] keyBytes = Decoders.BASE64.decode(secret);
        return new SecretKeySpec(keyBytes, SignatureAlgorithm.HS256.getJcaName());
     }
 
     public String generateToken(String username) {
         Map<String, Object> claims = new HashMap<>();
-        return doGenerateToken(claims, username);
+        return doGenerateToken(claims, username, JWT_SECRET, JWT_TOKEN_EXPIRATION_SECOND);
     }
 
-    private String doGenerateToken(Map<String, Object> claims, String subject) {
+    public String generateRefreshToken(String username) {
+        Map<String, Object> claims = new HashMap<>();
+        return doGenerateToken(claims, username, JWT_REFRESH_SECRET, JWT_REFRESH_TOKEN_EXPIRATION_SECOND);
+    }
+
+    private String doGenerateToken(Map<String, Object> claims, String subject, String secret, long expiredTime) {
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_EXPIRATION_SECOND * 1000))
-                .signWith(getSignKey(), SignatureAlgorithm.HS256)
+                .setExpiration(new Date(System.currentTimeMillis() + expiredTime * 1000))
+                .signWith(getSignKey(secret), SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -56,6 +63,11 @@ public class JwtTokenProvider {
 
     public String getUsername(Claims claims) {
         return claims.getSubject();
+    }
+
+    public String getUsernameUsingRefreshToken(String token) {
+        Claims claims = getClaimsFromToken(token, JWT_REFRESH_SECRET);
+        return getUsername(claims);
     }
 
     public boolean isTokenExpiration(Claims claims) {
@@ -71,14 +83,14 @@ public class JwtTokenProvider {
     }
 
     public Authentication getAuthentication(String token) {
-        Claims claims = getClaimsFromToken(token);
+        Claims claims = getClaimsFromToken(token, JWT_SECRET);
         UserProfileDetails userProfileDetails = userProfileDetailsService.loadUserByUsername(getUsername(claims));
         return new UsernamePasswordAuthenticationToken(userProfileDetails, null, userProfileDetails.getAuthorities());
     }
 
-    private Claims getClaimsFromToken(String token) {
+    private Claims getClaimsFromToken(String token, String secret) {
         return Jwts.parserBuilder()
-                .setSigningKey(getSignKey())
+                .setSigningKey(getSignKey(secret))
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
@@ -86,14 +98,31 @@ public class JwtTokenProvider {
 
     public boolean validateToken(String token) {
         try {
-            Claims claims = getClaimsFromToken(token);
+            Claims claims = getClaimsFromToken(token, JWT_SECRET);
 
             if (isTokenExpiration(claims)) {
                 return false;
             }
             return true;
+        } catch (ExpiredJwtException e) {
+            throw e;
         } catch (JwtException e) {
-            throw new JwtException("jwt authentication failed");
+            throw e;
+        }
+    }
+
+    public boolean validateRefreshToken(String token) {
+        try {
+            Claims claims = getClaimsFromToken(token, JWT_REFRESH_SECRET);
+
+            if (isTokenExpiration(claims)) {
+                return false;
+            }
+            return true;
+        } catch (ExpiredJwtException e) {
+            throw e;
+        } catch (JwtException e) {
+            throw e;
         }
     }
 }

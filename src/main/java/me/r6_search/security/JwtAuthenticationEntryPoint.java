@@ -14,11 +14,21 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         response.setContentType("application/json");
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.getOutputStream().println(
-                "{ " +
-                        "\"message\": \"" + authException.getMessage() + "\",\n" +
-                        "\"status\": 401" +
-                "}");
+        if(request.getAttribute("expired") != null) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.getOutputStream().println(
+                    "{ " +
+                            "\"message\": \"expirated token\",\n" +
+                            "\"status\": 403,\n" +
+                            "\"expired\": true" +
+                    "}");
+        } else {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getOutputStream().println(
+                    "{ " +
+                            "\"message\": \"" + authException.getMessage() + "\",\n" +
+                            "\"status\": 401" +
+                    "}");
+        }
     }
 }

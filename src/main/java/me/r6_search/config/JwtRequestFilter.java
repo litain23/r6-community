@@ -1,6 +1,8 @@
 package me.r6_search.config;
 
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import me.r6_search.security.JwtTokenProvider;
 import org.springframework.security.core.Authentication;
@@ -23,9 +25,13 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String jwtToken = jwtTokenProvider.resolveToken(request);
-        if(jwtToken != null && jwtTokenProvider.validateToken(jwtToken)) {
-            Authentication auth = jwtTokenProvider.getAuthentication(jwtToken);
-            SecurityContextHolder.getContext().setAuthentication(auth);
+        try {
+            if(jwtToken != null && jwtTokenProvider.validateToken(jwtToken)) {
+                Authentication auth = jwtTokenProvider.getAuthentication(jwtToken);
+                SecurityContextHolder.getContext().setAuthentication(auth);
+            }
+        } catch (ExpiredJwtException e) {
+            request.setAttribute("expired", true);
         }
 
         filterChain.doFilter(request, response);
