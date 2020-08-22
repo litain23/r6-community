@@ -19,6 +19,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.nio.file.Files;
 
@@ -33,13 +36,23 @@ public class JwtAuthenticationController {
     private final UserProfileService userProfileService;
 
     @PostMapping("/refresh")
-    public ResponseEntity refreshToken(@RequestBody JwtRefreshRequestDto requestDto) {
-        String refreshToken = requestDto.getRefreshToken();
+    public ResponseEntity refreshToken(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        String refreshToken = "wrong_token";
+        if(cookies != null) {
+            for(Cookie cookie : cookies) {
+                String name = cookie.getName();
+                if(name.equals("refresh-token")) {
+                    refreshToken = cookie.getValue();
+                    break;
+                }
+            }
+        }
         try {
             jwtTokenProvider.validateRefreshToken(refreshToken);
             String username = jwtTokenProvider.getUsernameUsingRefreshToken(refreshToken);
             String token = jwtTokenProvider.generateToken(username);
-            return ResponseEntity.ok(new JwtResponseDto(token, refreshToken));
+            return ResponseEntity.ok(new JwtResponseDto(token));
         } catch (ExpiredJwtException e) {
             return new ResponseEntity("{\"message\": \"리프레쉬토큰이 만료되었습니다.\"}", HttpStatus.FORBIDDEN);
         } catch (JwtException e) {
@@ -48,7 +61,8 @@ public class JwtAuthenticationController {
     }
 
     @PostMapping("/signin")
-    public ResponseEntity signin(@RequestBody JwtRequestDto authenticationRequest) {
+    public ResponseEntity signin(@RequestBody JwtRequestDto authenticationRequest,
+                                 HttpServletResponse response) {
         try {
             String username = authenticationRequest.getUsername();
             String password = authenticationRequest.getPassword();
@@ -56,7 +70,12 @@ public class JwtAuthenticationController {
 
             String token = jwtTokenProvider.generateToken(username);
             String refreshToken = jwtTokenProvider.generateRefreshToken(username);
-            return ResponseEntity.ok(new JwtResponseDto(token, refreshToken));
+
+            Cookie cookie = new Cookie("refresh-token", refreshToken);
+            cookie.setHttpOnly(true);
+//            cookie.setSecure(true);
+            response.addCookie(cookie);
+            return ResponseEntity.ok(new JwtResponseDto(token));
         } catch (AuthenticationException e) {
             throw new UserAuthenticationException("아이디 또는 비밀번호가 일치하지 않습니다");
         }
